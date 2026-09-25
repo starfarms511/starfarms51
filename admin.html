@@ -7,7 +7,7 @@
 <style>
 :root{--green:#39FF14;--purple:#B026FF;--dark:#0a0a0f;--card:#12121e;--card2:#1a1a2e;--border:#2a2a4a;--gold:#FFD700;--text:#f0f0f0;--text2:#aaaacc;--red:#ff4444;--blue:#4488ff}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--dark);color:var(--text);font-family:Arial,sans-serif;min-height:100vh}
+body{background:var(--dark);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;overflow-x:hidden}
 #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
 .login-box{background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:2rem;width:100%;max-width:380px;text-align:center}
 .login-logo{width:80px;height:80px;border-radius:16px;margin-bottom:1rem;object-fit:cover}
@@ -27,7 +27,7 @@ body{background:var(--dark);color:var(--text);font-family:Arial,sans-serif;min-h
 .nav-btn.active{background:rgba(57,255,20,0.1);color:var(--green);font-weight:700}
 .sidebar-bottom{margin-top:auto}
 .logout-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:none;color:var(--text2);font-size:13px;cursor:pointer;width:100%}
-.main{margin-left:220px;padding:2rem;min-height:100vh;max-width:calc(100vw - 220px);overflow-x:hidden}
+.main{margin-left:220px;padding:2rem;min-height:100vh;width:calc(100vw - 220px);overflow-x:hidden;box-sizing:border-box}
 .page-title{font-size:22px;font-weight:900;margin-bottom:1.5rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .tab{display:none}.tab.active{display:block}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:2rem}
@@ -39,7 +39,7 @@ body{background:var(--dark);color:var(--text);font-family:Arial,sans-serif;min-h
 .table-wrap{background:var(--card2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.5rem}
 .table-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
 .table-title{font-size:15px;font-weight:700}
-table{width:100%;border-collapse:collapse;table-layout:fixed}
+table{width:100%;border-collapse:collapse}
 th{padding:10px 16px;text-align:left;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.2)}
 td{padding:12px 16px;font-size:13px;border-bottom:1px solid rgba(42,42,74,0.5);vertical-align:middle}
 tr:last-child td{border-bottom:none}
@@ -159,9 +159,7 @@ tr:last-child td{border-bottom:none}
       </div>
       <div class="empty" id="vis-empty" style="display:none"><div class="empty-icon">👽</div><p>Aucun visiteur</p></div>
     </div>
-  </div>
-</div>
-<div class="tab" id="tab-categories">
+    <div class="tab" id="tab-categories">
       <div class="page-title">🏷️ Categories <button class="btn btn-green" id="btn-add-cat" style="margin-left:auto;font-size:13px">+ Ajouter</button></div>
       <div class="table-wrap">
         <table><thead><tr><th>Emoji</th><th>Nom</th><th>Actions</th></tr></thead>
@@ -169,6 +167,8 @@ tr:last-child td{border-bottom:none}
       </div>
       <div class="empty" id="cat-empty" style="display:none"><div class="empty-icon">🏷️</div><p>Aucune categorie</p></div>
     </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="product-modal">
   <div class="modal">
