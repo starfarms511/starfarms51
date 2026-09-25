@@ -447,16 +447,21 @@ function getTelegramUser() {
   try {
     if (window.Telegram && window.Telegram.WebApp) {
       window.Telegram.WebApp.expand();
-      var initData = window.Telegram.WebApp.initDataUnsafe;
+      var tg = window.Telegram.WebApp;
+      console.log("TG WebApp version:", tg.version);
+      console.log("TG initData:", tg.initData);
+      console.log("TG initDataUnsafe:", JSON.stringify(tg.initDataUnsafe));
+      var initData = tg.initDataUnsafe;
       if (initData && initData.user) {
         var user = initData.user;
         var pseudo = "";
         if (user.username) pseudo = "@" + user.username;
         else if (user.first_name) pseudo = user.first_name + (user.last_name ? " " + user.last_name : "");
         if (pseudo) return pseudo + " (ID:" + user.id + ")";
+        if (user.id) return "TG_ID:" + user.id;
       }
     }
-  } catch(e) { console.warn("TG user:", e); }
+  } catch(e) { console.warn("TG user error:", e); }
   return null;
 }
 
