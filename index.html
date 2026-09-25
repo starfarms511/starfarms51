@@ -416,7 +416,10 @@ function loadProducts() {
 
 
 
-document.getElementById("btn-enter").addEventListener("click", initApp);
+document.getElementById("btn-enter").addEventListener("click", function(){
+  document.getElementById("page-splash").style.display = "none";
+  initApp();
+});
 document.getElementById("back-to-menu").addEventListener("click", function(){ goPage("menu"); });
 document.getElementById("back-cart-menu").addEventListener("click", function(){ goPage("menu"); });
 document.getElementById("back-to-cart").addEventListener("click", function(){ goPage("cart"); });
