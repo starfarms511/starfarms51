@@ -286,6 +286,30 @@ function goPage(page) {
   window.scrollTo(0,0);
 }
 
+function initApp() {
+  // Push a history state so back button doesn't return to splash
+  history.pushState({page: "menu"}, "", "");
+  goPage("menu");
+  loadProducts();
+  if(typeof claude !== "undefined") {
+    claude.use("db").then(function(d){
+      db = d;
+      loadProducts();
+      var vid = "v_" + Math.random().toString(36).substr(2,9) + "_" + Date.now();
+      visitorId = vid;
+      d.doc("visitors/" + vid).set({pseudo:null,firstVisit:Date.now(),lastVisit:Date.now(),visits:1,orders:0}).catch(function(){});
+    }).catch(function(e){ console.warn("DB unavailable:", e); });
+  }
+}
+
+// Handle back button - prevent going back to splash
+window.addEventListener("popstate", function(e) {
+  if(document.getElementById("page-splash").classList.contains("active") === false) {
+    history.pushState({page: "menu"}, "", "");
+    goPage("menu");
+  }
+});
+
 function updateCartBadge() {
   var n = cart.reduce(function(s,i){ return s+i.qty; }, 0);
   ["cart-badge","cart-badge-2","cart-badge-nav"].forEach(function(id){
@@ -390,31 +414,9 @@ function loadProducts() {
   }
 }
 
-function initApp() {
-  goPage("menu");
-  loadProducts();
-  if(typeof claude !== "undefined") {
-    claude.use("db").then(function(d){
-      db = d;
-      loadProducts();
-      var vid = "v_" + Math.random().toString(36).substr(2,9) + "_" + Date.now();
-      visitorId = vid;
-      d.doc("visitors/" + vid).set({pseudo:null,firstVisit:Date.now(),lastVisit:Date.now(),visits:1,orders:0}).catch(function(){});
-    }).catch(function(e){ console.warn("DB unavailable:", e); });
-  }
-}
 
-document.getElementById("btn-enter").addEventListener("click", function(){
-  try { localStorage.setItem("sf51_entered", "1"); } catch(e){}
-  initApp();
-});
 
-// Auto-skip splash if already entered before
-try {
-  if(localStorage.getItem("sf51_entered") === "1") {
-    initApp();
-  }
-} catch(e){}
+document.getElementById("btn-enter").addEventListener("click", initApp);
 document.getElementById("back-to-menu").addEventListener("click", function(){ goPage("menu"); });
 document.getElementById("back-cart-menu").addEventListener("click", function(){ goPage("menu"); });
 document.getElementById("back-to-cart").addEventListener("click", function(){ goPage("cart"); });
