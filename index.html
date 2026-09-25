@@ -357,13 +357,13 @@ function openProduct(id){
       var t2=document.createElement("div");t2.className="media-tab";
       var ti=document.createElement("img");ti.src=currentProduct.img;t2.appendChild(ti);
       t2.addEventListener("click",function(){
-        mediaEl.innerHTML="<img src='"+currentProduct.img+"' style='width:100%;max-height:320px;object-fit:cover'>";
+        mediaEl.innerHTML="<img src='"+currentProduct.img+"' style='width:100%;height:280px;object-fit:contain;background:#000'>";
         document.querySelectorAll(".media-tab").forEach(function(t){t.classList.remove("active");});t2.classList.add("active");
       });
       tabsEl.appendChild(t2);
     }
   } else if(hasImg){
-    mediaEl.innerHTML="<img src='"+currentProduct.img+"' style='width:100%;max-height:320px;object-fit:cover'>";
+    mediaEl.innerHTML="<img src='"+currentProduct.img+"' style='width:100%;height:280px;object-fit:contain;background:#000'>";
   } else {
     mediaEl.innerHTML="<div style='width:100%;height:240px;display:flex;align-items:center;justify-content:center;font-size:80px;background:#111'>"+(currentProduct.cat==="Fleurs"?"🌸":"🍯")+"</div>";
   }
