@@ -197,7 +197,7 @@ tr:last-child td{border-bottom:none}
     </div>
     <div class="form-group"><label class="form-label">URL Video Cloudinary</label><input type="text" class="form-input" id="p-video" placeholder="https://res.cloudinary.com/...mp4"></div>
     <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="p-name" placeholder="Ex: ALIEN OG"></div>
-    <div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="p-cat"><option value="Fleurs">Fleurs</option><option value="Résines">Resines</option></select></div>
+    <div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="p-cat"><option value="">Chargement...</option></select></div>
     <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="p-description" placeholder="Description, aromes, taux CBD..."></textarea></div>
     <div class="form-group">
       <label class="form-label">Formats et Prix</label>
@@ -367,12 +367,30 @@ async function loadVisiteurs() {
   } catch(e) { console.error(e); }
 }
 
+async function loadCatsIntoSelect() {
+  try {
+    var cats = await sbFetch("categories?select=*&order=created_at.asc");
+    var select = document.getElementById("p-cat");
+    select.innerHTML = "";
+    cats.forEach(function(c) {
+      var opt = document.createElement("option");
+      opt.value = c.name;
+      opt.textContent = (c.emoji || "") + " " + c.name;
+      select.appendChild(opt);
+    });
+  } catch(e) {
+    console.warn("cats select:", e);
+  }
+}
+
 function openModal(product) {
   editId = product ? product.id : null;
   currentImg = product ? product.img : null;
   document.getElementById("modal-title").textContent = product ? "Modifier" : "Nouveau produit";
   document.getElementById("p-name").value = product ? product.name : "";
-  document.getElementById("p-cat").value = product ? product.cat : "Fleurs";
+  loadCatsIntoSelect().then(function() {
+    if (product && product.cat) document.getElementById("p-cat").value = product.cat;
+  });
   document.getElementById("p-description").value = product ? (product.description || "") : "";
   document.getElementById("p-status").value = product ? product.status : "active";
   document.getElementById("p-video").value = product && product.video ? product.video : "";
