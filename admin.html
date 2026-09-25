@@ -100,6 +100,7 @@ tr:last-child td{border-bottom:none}
   #admin-screen{padding-bottom:60px}
 }
 </style>
+<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
 </head>
 <body>
 <div class="toast" id="toast"></div>
@@ -195,7 +196,15 @@ tr:last-child td{border-bottom:none}
         <span class="upload-hint">Cliquer pour uploader</span>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">URL Video Cloudinary</label><input type="text" class="form-input" id="p-video" placeholder="https://res.cloudinary.com/...mp4"></div>
+    <div class="form-group">
+  <label class="form-label">Video</label>
+  <div id="video-preview" style="display:none;margin-bottom:8px">
+    <video id="video-preview-player" controls style="width:100%;border-radius:8px;max-height:160px;background:#000"></video>
+    <button class="btn btn-red" id="btn-remove-video" style="margin-top:6px;width:100%">Supprimer la video</button>
+  </div>
+  <input type="hidden" id="p-video">
+  <button class="btn btn-ghost" id="btn-upload-video" style="width:100%;padding:14px;border:2px dashed var(--border)">🎬 Uploader une video</button>
+</div>
     <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="p-name" placeholder="Ex: ALIEN OG"></div>
     <div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="p-cat"><option value="">Chargement...</option></select></div>
     <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="p-description" placeholder="Description, aromes, taux CBD..."></textarea></div>
@@ -393,7 +402,16 @@ function openModal(product) {
   });
   document.getElementById("p-description").value = product ? (product.description || "") : "";
   document.getElementById("p-status").value = product ? product.status : "active";
-  document.getElementById("p-video").value = product && product.video ? product.video : "";
+  var videoUrl = product && product.video ? product.video : "";
+  document.getElementById("p-video").value = videoUrl;
+  if (videoUrl) {
+    document.getElementById("video-preview-player").src = videoUrl;
+    document.getElementById("video-preview").style.display = "block";
+    document.getElementById("btn-upload-video").style.display = "none";
+  } else {
+    document.getElementById("video-preview").style.display = "none";
+    document.getElementById("btn-upload-video").style.display = "block";
+  }
   var area = document.getElementById("img-upload-area");
   var ex = area.querySelector("img.preview");
   if (ex) ex.remove();
@@ -520,6 +538,59 @@ document.getElementById("img-file-input").addEventListener("change", function(e)
 });
 document.getElementById("product-modal").addEventListener("click", function(e) {
   if (e.target === this) closeModal();
+});
+
+var videoWidget = cloudinary.createUploadWidget({
+  cloudName: "starfarms511",
+  uploadPreset: "sf51_videos",
+  sources: ["local", "camera"],
+  resourceType: "video",
+  maxFileSize: 100000000,
+  clientAllowedFormats: ["mp4", "mov", "avi", "webm"],
+  language: "fr",
+  text: {
+    "fr": {
+      "or": "ou",
+      "back": "Retour",
+      "advanced": "Avance",
+      "close": "Fermer",
+      "no_results": "Aucun resultat",
+      "search_placeholder": "Rechercher...",
+      "about_uw": "A propos",
+      "menu": {
+        "files": "Mes fichiers",
+        "camera": "Camera"
+      },
+      "local": {
+        "browse": "Parcourir",
+        "dd_title_single": "Glissez votre video ici",
+        "dd_title_multi": "Glissez vos videos ici",
+        "drop_title_single": "Deposez votre video",
+        "drop_title_multiple": "Deposez vos videos"
+      }
+    }
+  }
+}, function(error, result) {
+  if (!error && result && result.event === "success") {
+    var url = result.info.secure_url;
+    document.getElementById("p-video").value = url;
+    var player = document.getElementById("video-preview-player");
+    player.src = url;
+    document.getElementById("video-preview").style.display = "block";
+    document.getElementById("btn-upload-video").style.display = "none";
+    showToast("Video uploadee !");
+  }
+});
+
+document.getElementById("btn-upload-video").addEventListener("click", function() {
+  videoWidget.open();
+});
+
+document.getElementById("btn-remove-video").addEventListener("click", function() {
+  document.getElementById("p-video").value = "";
+  document.getElementById("video-preview-player").src = "";
+  document.getElementById("video-preview").style.display = "none";
+  document.getElementById("btn-upload-video").style.display = "block";
 });
 
 var editCatId = null;
