@@ -541,7 +541,7 @@ document.getElementById("product-modal").addEventListener("click", function(e) {
 
 var videoFileInput = document.createElement("input");
 videoFileInput.type = "file";
-videoFileInput.accept = "video/mp4,video/mov,video/avi,video/webm";
+videoFileInput.accept = "video/*";
 videoFileInput.style.display = "none";
 document.body.appendChild(videoFileInput);
 
@@ -549,31 +549,53 @@ videoFileInput.addEventListener("change", async function() {
   var file = this.files[0];
   if (!file) return;
   var btn = document.getElementById("btn-upload-video");
-  btn.textContent = "Upload en cours...";
+  btn.textContent = "Upload en cours... 0%";
   btn.disabled = true;
   try {
     var formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "sf51_videos");
-    formData.append("resource_type", "video");
-    var response = await fetch("https://api.cloudinary.com/v1_1/m48xript/video/upload", {
-      method: "POST",
-      body: formData
-    });
-    var data = await response.json();
-    if (data.secure_url) {
-      document.getElementById("p-video").value = data.secure_url;
-      document.getElementById("video-preview-player").src = data.secure_url;
-      document.getElementById("video-preview").style.display = "block";
-      btn.style.display = "none";
-      showToast("Video uploadee !");
-    } else {
-      showToast("Erreur: " + (data.error ? data.error.message : "Upload echoue"));
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://api.cloudinary.com/v1_1/m48xript/auto/upload", true);
+    
+    xhr.upload.onprogress = function(e) {
+      if (e.lengthComputable) {
+        var pct = Math.round(e.loaded / e.total * 100);
+        btn.textContent = "Upload en cours... " + pct + "%";
+      }
+    };
+    
+    xhr.onload = function() {
+      try {
+        var data = JSON.parse(xhr.responseText);
+        if (data.secure_url) {
+          document.getElementById("p-video").value = data.secure_url;
+          document.getElementById("video-preview-player").src = data.secure_url;
+          document.getElementById("video-preview").style.display = "block";
+          btn.style.display = "none";
+          showToast("Video uploadee !");
+        } else {
+          showToast("Erreur: " + (data.error ? data.error.message : "Upload echoue"));
+          btn.textContent = "🎬 Uploader une video";
+          btn.disabled = false;
+        }
+      } catch(e) {
+        showToast("Erreur parsing: " + e.message);
+        btn.textContent = "🎬 Uploader une video";
+        btn.disabled = false;
+      }
+    };
+    
+    xhr.onerror = function() {
+      showToast("Erreur reseau");
       btn.textContent = "🎬 Uploader une video";
       btn.disabled = false;
-    }
+    };
+    
+    xhr.send(formData);
   } catch(e) {
-    showToast("Erreur upload: " + e.message);
+    showToast("Erreur: " + e.message);
     btn.textContent = "🎬 Uploader une video";
     btn.disabled = false;
   }
