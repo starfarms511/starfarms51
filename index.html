@@ -186,6 +186,25 @@ body{background:radial-gradient(120% 45% at 50% -8%,#2A0A4A 0%,rgba(42,10,74,0) 
 .nav-item.active::before{content:"";position:absolute;top:-4px;width:24px;height:3px;border-radius:0 0 3px 3px;background:#7CFF2E;box-shadow:0 0 10px rgba(124,255,46,.85)}
 .nav-icon{position:relative;display:flex}
 @media (prefers-reduced-motion:reduce){.pskel{animation:none}}
+
+/* ===== CONFIRMATION ===== */
+.cf-wrap{max-width:420px;margin:0 auto;padding:40px 20px 24px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.cf-ico{width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;background:radial-gradient(circle,rgba(124,255,46,.22),rgba(124,255,46,0) 70%);box-shadow:0 0 0 1.5px rgba(124,255,46,.55),0 0 34px rgba(124,255,46,.35);animation:cfpop .5s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes cfpop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.cf-title{margin:22px 0 8px;font-family:'Bungee','Arial Black',Arial,sans-serif;font-size:24px;font-weight:400;color:#fff}
+.cf-text{font-size:15px;line-height:1.5;color:rgba(237,230,255,.75);max-width:32ch}
+.cf-card{width:100%;margin-top:22px;padding:6px 16px;border-radius:18px;text-align:left;background:rgba(176,38,255,.08);border:1px solid rgba(176,38,255,.3)}
+.cf-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 0;font-size:14px;color:rgba(237,230,255,.7);border-bottom:1px solid rgba(176,38,255,.18)}
+.cf-row b{color:#fff;font-weight:700}
+.cf-items{padding:8px 0;border-bottom:1px solid rgba(176,38,255,.18)}
+.cf-item{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:14px;color:#EDE6FF}
+.cf-item span:last-child{color:rgba(237,230,255,.75);white-space:nowrap}
+.cf-total{border-bottom:0;font-size:16px}
+.cf-total b{color:#7CFF2E;font-size:19px;font-weight:800}
+.cf-btn{width:100%;margin-top:24px;padding:17px 0;border:0;border-radius:16px;cursor:pointer;font:800 16px 'Outfit',Arial,sans-serif;color:#0C2300;background:linear-gradient(180deg,#D9FF74 0%,#9DFF3C 46%,#52DA14 100%);box-shadow:0 5px 0 #237A05,0 10px 22px rgba(124,255,46,.28)}
+.cf-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #237A05}
+.cf-link{margin-top:18px;font-size:14px;font-weight:600;color:rgba(237,230,255,.72);text-decoration:none;padding-bottom:3px;border-bottom:1px solid rgba(176,38,255,.45)}
+.btn-send:disabled{opacity:.6;cursor:wait}
 </style>
 </head>
 <body>
@@ -304,6 +323,22 @@ body{background:radial-gradient(120% 45% at 50% -8%,#2A0A4A 0%,rgba(42,10,74,0) 
       <div class="co-total-row final"><span>Total</span><span id="co-total">0€</span></div>
     </div>
     <button class="btn-send" id="btn-send">📲 Envoyer la commande</button>
+  </div>
+</div>
+
+<div class="page" id="page-confirm">
+  <div class="cf-wrap">
+    <div class="cf-ico">🛸</div>
+    <h1 class="cf-title">Commande envoyée</h1>
+    <p class="cf-text" id="cf-text"></p>
+    <div class="cf-card">
+      <div class="cf-row"><span>Référence</span><b id="cf-ref"></b></div>
+      <div class="cf-row"><span>Mode</span><b id="cf-mode"></b></div>
+      <div class="cf-items" id="cf-items"></div>
+      <div class="cf-row cf-total"><span>Total</span><b id="cf-total"></b></div>
+    </div>
+    <button type="button" class="cf-btn" id="cf-back">Retour au catalogue</button>
+    <a class="cf-link" id="cf-tg" href="#" target="_blank" rel="noopener">Écrire au vendeur sur Telegram</a>
   </div>
 </div>
 
@@ -614,32 +649,43 @@ document.getElementById("del-meetup").addEventListener("click",function(){
   document.getElementById("addr-section").style.display="none";
 });
 document.getElementById("btn-send").addEventListener("click",async function(){
+  var btn=this;
   var pseudo=document.getElementById("tg-pseudo").value.trim();
-  if(!pseudo){showToast("Entre ton pseudo Telegram !");return;}
+  if(!pseudo){showToast("Entre ton pseudo Telegram");return;}
   var phone=document.getElementById("co-phone").value.trim();
-  if(!phone){showToast("Entre ton numéro de téléphone !");return;}
+  if(phone.replace(/[^\d]/g,"").length<10){showToast("Numéro de téléphone invalide");return;}
   var sub=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
-  if(sub<50){showToast("Minimum 50 euros !");return;}
+  if(sub<50){showToast("Minimum de commande : 50 €");return;}
+  var addr=selectedDelivery==="livraison"?[document.getElementById("co-addr").value,document.getElementById("co-cp").value,document.getElementById("co-city").value].map(function(x){return x.trim();}).filter(Boolean).join(", "):"";
+  if(selectedDelivery==="livraison"&&!addr){showToast("Indique ton adresse de livraison");return;}
+  var notes=document.getElementById("co-notes").value.trim();
+  var ref="SF"+Date.now().toString(36).toUpperCase();
+  var items=cart.map(function(i){return{name:i.name,weight:i.weight,price:i.price,qty:i.qty};});
+  btn.disabled=true; var label=btn.textContent; btn.textContent="Envoi en cours…";
   try{
-    var addr=selectedDelivery==="livraison"?[document.getElementById("co-addr").value,document.getElementById("co-cp").value,document.getElementById("co-city").value].filter(Boolean).join(", "):"";
-    await sbFetch("orders","POST",{id:"order_"+Date.now(),pseudo:pseudo,phone:phone,delivery:selectedDelivery,address:addr,notes:document.getElementById("co-notes").value,items:JSON.stringify(cart.map(function(i){return{name:i.name,weight:i.weight,price:i.price,qty:i.qty};})),total:sub,date:Date.now()});
-    
-  }catch(e){console.warn("Order save:",e);}
-  var msg="NOUVELLE COMMANDE - STARFARMS 51\n\n";
-  msg+="Client : "+pseudo+"\n";
-  msg+="Tel : "+phone+"\n";
-  msg+="Mode : "+(selectedDelivery==="livraison"?"Livraison":"Meet-up")+"\n";
-  if(selectedDelivery==="livraison"){var a=[document.getElementById("co-addr").value,document.getElementById("co-cp").value,document.getElementById("co-city").value].filter(Boolean).join(", ");if(a)msg+="Adresse : "+a+"\n";}
-  msg+="\nCommande :\n";
-  cart.forEach(function(i){msg+="- "+i.name+" "+i.weight+" x"+i.qty+" = "+(i.price*i.qty)+"EUR\n";});
-  msg+="\nTotal : "+sub+"EUR";
-  var notes=document.getElementById("co-notes").value;
-  if(notes)msg+="\nNotes : "+notes;
-  window.open("https://t.me/laligue51_com?text="+encodeURIComponent(msg),"_blank");
-  showToast("Commande envoyee !");
+    await Promise.race([
+      sbFetch("orders","POST",{id:ref,pseudo:pseudo,phone:phone,delivery:selectedDelivery,address:addr,notes:notes,items:JSON.stringify(items),total:sub,date:Date.now()}),
+      new Promise(function(_,rej){setTimeout(function(){rej(new Error("timeout"));},12000);})
+    ]);
+  }catch(err){
+    console.warn("Order save:",err);
+    showToast("Commande non envoyée. Vérifie ta connexion et réessaie.");
+    btn.disabled=false; btn.textContent=label; return;
+  }
+  var msg="Commande "+ref+"\n"+items.map(function(i){return "- "+i.name+" "+i.weight+" x"+i.qty;}).join("\n")+"\nTotal : "+sub+" €";
+  document.getElementById("cf-text").textContent="On te contacte sur Telegram ("+pseudo+") pour confirmer "+(selectedDelivery==="livraison"?"le créneau de livraison.":"le lieu et l'heure du meet-up.");
+  document.getElementById("cf-ref").textContent=ref;
+  document.getElementById("cf-mode").textContent=selectedDelivery==="livraison"?"Livraison":"Meet-up";
+  document.getElementById("cf-items").innerHTML=items.map(function(i){return "<div class='cf-item'><span>"+esc(i.name)+" · "+esc(i.weight)+" ×"+esc(i.qty)+"</span><span>"+esc(i.price*i.qty)+" €</span></div>";}).join("");
+  document.getElementById("cf-total").textContent=sub+" €";
+  document.getElementById("cf-tg").href="https://t.me/laligue51_com?text="+encodeURIComponent(msg);
   cart=[];updateCartBadge();
-  setTimeout(function(){goPage("menu");},1500);
+  btn.disabled=false; btn.textContent=label;
+  ["co-notes"].forEach(function(id){document.getElementById(id).value="";});
+  goPage("confirm");
 });
+document.getElementById("cf-back").addEventListener("click",function(){goPage("menu");});
+
 
 (function(){
   try{
