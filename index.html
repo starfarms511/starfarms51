@@ -44,8 +44,8 @@ body{background:var(--dark);color:var(--text);font-family:'Arial Black',Arial,sa
 .product-card-cat{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
 .product-card-price{font-size:11px;color:var(--green);font-weight:700}
 .product-media{width:100%;position:relative;background:#000;height:280px;overflow:hidden}
-.product-media img{width:100%;height:100%;object-fit:contain;background:#000}
-.product-media video{width:100%;height:100%;object-fit:contain;background:#000}
+.product-media img{width:100%!important;height:280px!important;object-fit:contain!important;background:#000!important;max-height:none!important}
+.product-media video{width:100%!important;height:280px!important;object-fit:contain!important;background:#000!important}
 .media-tabs{display:flex;gap:6px;padding:10px 16px 0;overflow-x:auto;scrollbar-width:none}
 .media-tab{width:50px;height:50px;border-radius:8px;overflow:hidden;border:2px solid transparent;cursor:pointer;flex-shrink:0;background:#111;display:flex;align-items:center;justify-content:center}
 .media-tab.active{border-color:var(--green)}
@@ -196,6 +196,10 @@ body{background:var(--dark);color:var(--text);font-family:'Arial Black',Arial,sa
     <div class="co-section">
       <div class="co-label">Pseudo Telegram</div>
       <input type="text" class="co-input" id="tg-pseudo" placeholder="@tonpseudo" style="margin-bottom:0">
+    </div>
+    <div class="co-section">
+      <div class="co-label">Numéro de téléphone</div>
+      <input type="tel" class="co-input" id="co-phone" placeholder="06 XX XX XX XX" style="margin-bottom:0">
     </div>
     <div class="co-section">
       <div class="co-label">Mode de livraison</div>
@@ -441,12 +445,18 @@ async function loadCategories() {
 
 function getTelegramUser() {
   try {
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-      var user = window.Telegram.WebApp.initDataUnsafe.user;
-      if (user && user.username) return "@" + user.username;
-      if (user && user.first_name) return user.first_name;
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.expand();
+      var initData = window.Telegram.WebApp.initDataUnsafe;
+      if (initData && initData.user) {
+        var user = initData.user;
+        var pseudo = "";
+        if (user.username) pseudo = "@" + user.username;
+        else if (user.first_name) pseudo = user.first_name + (user.last_name ? " " + user.last_name : "");
+        if (pseudo) return pseudo + " (ID:" + user.id + ")";
+      }
     }
-  } catch(e) {}
+  } catch(e) { console.warn("TG user:", e); }
   return null;
 }
 
@@ -524,15 +534,18 @@ document.getElementById("del-meetup").addEventListener("click",function(){
 document.getElementById("btn-send").addEventListener("click",async function(){
   var pseudo=document.getElementById("tg-pseudo").value.trim();
   if(!pseudo){showToast("Entre ton pseudo Telegram !");return;}
+  var phone=document.getElementById("co-phone").value.trim();
+  if(!phone){showToast("Entre ton numéro de téléphone !");return;}
   var sub=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
   if(sub<50){showToast("Minimum 50 euros !");return;}
   try{
     var addr=selectedDelivery==="livraison"?[document.getElementById("co-addr").value,document.getElementById("co-cp").value,document.getElementById("co-city").value].filter(Boolean).join(", "):"";
-    await sbFetch("orders","POST",{id:"order_"+Date.now(),pseudo:pseudo,delivery:selectedDelivery,address:addr,notes:document.getElementById("co-notes").value,items:JSON.stringify(cart.map(function(i){return{name:i.name,weight:i.weight,price:i.price,qty:i.qty};})),total:sub,date:Date.now()});
+    await sbFetch("orders","POST",{id:"order_"+Date.now(),pseudo:pseudo,phone:phone,delivery:selectedDelivery,address:addr,notes:document.getElementById("co-notes").value,items:JSON.stringify(cart.map(function(i){return{name:i.name,weight:i.weight,price:i.price,qty:i.qty};})),total:sub,date:Date.now()});
     if(visitorId){await sbFetch("visitors?id=eq."+visitorId,"PATCH",{pseudo:pseudo,last_visit:Date.now()});}
   }catch(e){console.warn("Order save:",e);}
   var msg="NOUVELLE COMMANDE - STARFARMS 51\n\n";
   msg+="Client : "+pseudo+"\n";
+  msg+="Tel : "+phone+"\n";
   msg+="Mode : "+(selectedDelivery==="livraison"?"Livraison":"Meet-up")+"\n";
   if(selectedDelivery==="livraison"){var a=[document.getElementById("co-addr").value,document.getElementById("co-cp").value,document.getElementById("co-city").value].filter(Boolean).join(", ");if(a)msg+="Adresse : "+a+"\n";}
   msg+="\nCommande :\n";
