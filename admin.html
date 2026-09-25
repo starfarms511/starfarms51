@@ -100,7 +100,6 @@ tr:last-child td{border-bottom:none}
   #admin-screen{padding-bottom:60px}
 }
 </style>
-<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
 </head>
 <body>
 <div class="toast" id="toast"></div>
@@ -540,50 +539,48 @@ document.getElementById("product-modal").addEventListener("click", function(e) {
   if (e.target === this) closeModal();
 });
 
-var videoWidget = cloudinary.createUploadWidget({
-  cloudName: "starfarms511",
-  uploadPreset: "sf51_videos",
-  sources: ["local", "camera"],
-  resourceType: "video",
-  maxFileSize: 100000000,
-  clientAllowedFormats: ["mp4", "mov", "avi", "webm"],
-  language: "fr",
-  text: {
-    "fr": {
-      "or": "ou",
-      "back": "Retour",
-      "advanced": "Avance",
-      "close": "Fermer",
-      "no_results": "Aucun resultat",
-      "search_placeholder": "Rechercher...",
-      "about_uw": "A propos",
-      "menu": {
-        "files": "Mes fichiers",
-        "camera": "Camera"
-      },
-      "local": {
-        "browse": "Parcourir",
-        "dd_title_single": "Glissez votre video ici",
-        "dd_title_multi": "Glissez vos videos ici",
-        "drop_title_single": "Deposez votre video",
-        "drop_title_multiple": "Deposez vos videos"
-      }
+var videoFileInput = document.createElement("input");
+videoFileInput.type = "file";
+videoFileInput.accept = "video/mp4,video/mov,video/avi,video/webm";
+videoFileInput.style.display = "none";
+document.body.appendChild(videoFileInput);
+
+videoFileInput.addEventListener("change", async function() {
+  var file = this.files[0];
+  if (!file) return;
+  var btn = document.getElementById("btn-upload-video");
+  btn.textContent = "Upload en cours...";
+  btn.disabled = true;
+  try {
+    var formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "sf51_videos");
+    formData.append("resource_type", "video");
+    var response = await fetch("https://api.cloudinary.com/v1_1/m48xript/video/upload", {
+      method: "POST",
+      body: formData
+    });
+    var data = await response.json();
+    if (data.secure_url) {
+      document.getElementById("p-video").value = data.secure_url;
+      document.getElementById("video-preview-player").src = data.secure_url;
+      document.getElementById("video-preview").style.display = "block";
+      btn.style.display = "none";
+      showToast("Video uploadee !");
+    } else {
+      showToast("Erreur: " + (data.error ? data.error.message : "Upload echoue"));
+      btn.textContent = "🎬 Uploader une video";
+      btn.disabled = false;
     }
-  }
-}, function(error, result) {
-  if (!error && result && result.event === "success") {
-    var url = result.info.secure_url;
-    document.getElementById("p-video").value = url;
-    var player = document.getElementById("video-preview-player");
-    player.src = url;
-    document.getElementById("video-preview").style.display = "block";
-    document.getElementById("btn-upload-video").style.display = "none";
-    showToast("Video uploadee !");
+  } catch(e) {
+    showToast("Erreur upload: " + e.message);
+    btn.textContent = "🎬 Uploader une video";
+    btn.disabled = false;
   }
 });
 
 document.getElementById("btn-upload-video").addEventListener("click", function() {
-  videoWidget.open();
+  videoFileInput.click();
 });
 
 document.getElementById("btn-remove-video").addEventListener("click", function() {
