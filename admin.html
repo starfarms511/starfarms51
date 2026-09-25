@@ -197,6 +197,17 @@ tr:last-child td{border-bottom:none}
     </div>
   </div>
 </div>
+<div class="modal-overlay" id="cat-modal">
+  <div class="modal">
+    <div class="modal-title" id="cat-modal-title">Nouvelle categorie</div>
+    <div class="form-group"><label class="form-label">Emoji</label><input type="text" class="form-input" id="cat-emoji" placeholder="Ex: 🌸"></div>
+    <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="cat-name" placeholder="Ex: Fleurs"></div>
+    <div class="modal-actions">
+      <button class="btn btn-green" id="btn-save-cat" style="flex:1">Sauvegarder</button>
+      <button class="btn btn-ghost" id="btn-cancel-cat">Annuler</button>
+    </div>
+  </div>
+</div>
 <script>
 var SB_URL = "https://tfztcaqmjmxbmomosdgo.supabase.co";
 var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmenRjYXFtam14Ym1vbW9zZGdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyODc5OTgsImV4cCI6MjEwNTg2Mzk5OH0.Amt6yLwv10bAh9Bw1sHKQWMSQd9hr7z84K341KEXCq0";
@@ -549,16 +560,5 @@ document.getElementById("btn-save-cat").addEventListener("click", saveCat);
 document.getElementById("btn-cancel-cat").addEventListener("click", closeCatModal);
 document.getElementById("cat-modal").addEventListener("click", function(e) { if (e.target === this) closeCatModal(); });
 </script>
-<div class="modal-overlay" id="cat-modal">
-  <div class="modal">
-    <div class="modal-title" id="cat-modal-title">Nouvelle categorie</div>
-    <div class="form-group"><label class="form-label">Emoji</label><input type="text" class="form-input" id="cat-emoji" placeholder="Ex: 🌸"></div>
-    <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="cat-name" placeholder="Ex: Fleurs"></div>
-    <div class="modal-actions">
-      <button class="btn btn-green" id="btn-save-cat" style="flex:1">Sauvegarder</button>
-      <button class="btn btn-ghost" id="btn-cancel-cat">Annuler</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
