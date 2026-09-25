@@ -353,11 +353,14 @@ var DEFAULT=[
 
 async function sbFetch(table,method,body,id){
   var url=SUPABASE_URL+"/rest/v1/"+table+(id?"/id=eq."+id:"");
-  var opts={method:method||"GET",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json","Prefer":method==="POST"?"return=representation":""}};
+  var headers={"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json"};
+  if(method==="POST") headers["Prefer"]="return=minimal";
+  var opts={method:method||"GET",headers:headers};
   if(body)opts.body=JSON.stringify(body);
   var r=await fetch(url,opts);
-  if(!r.ok)throw new Error(await r.text());
-  return r.status===204?null:r.json();
+  var txt=await r.text();
+  if(!r.ok)throw new Error(txt||("Erreur "+r.status));
+  return txt?JSON.parse(txt):null;
 }
 
 function showToast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},2500);}
@@ -620,7 +623,7 @@ document.getElementById("btn-send").addEventListener("click",async function(){
   try{
     var addr=selectedDelivery==="livraison"?[document.getElementById("co-addr").value,document.getElementById("co-cp").value,document.getElementById("co-city").value].filter(Boolean).join(", "):"";
     await sbFetch("orders","POST",{id:"order_"+Date.now(),pseudo:pseudo,phone:phone,delivery:selectedDelivery,address:addr,notes:document.getElementById("co-notes").value,items:JSON.stringify(cart.map(function(i){return{name:i.name,weight:i.weight,price:i.price,qty:i.qty};})),total:sub,date:Date.now()});
-    if(visitorId){await sbFetch("visitors?id=eq."+visitorId,"PATCH",{pseudo:pseudo,last_visit:Date.now()});}
+    
   }catch(e){console.warn("Order save:",e);}
   var msg="NOUVELLE COMMANDE - STARFARMS 51\n\n";
   msg+="Client : "+pseudo+"\n";
