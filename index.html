@@ -404,7 +404,17 @@ function initApp() {
   }
 }
 
-document.getElementById("btn-enter").addEventListener("click", initApp);
+document.getElementById("btn-enter").addEventListener("click", function(){
+  try { localStorage.setItem("sf51_entered", "1"); } catch(e){}
+  initApp();
+});
+
+// Auto-skip splash if already entered before
+try {
+  if(localStorage.getItem("sf51_entered") === "1") {
+    initApp();
+  }
+} catch(e){}
 document.getElementById("back-to-menu").addEventListener("click", function(){ goPage("menu"); });
 document.getElementById("back-cart-menu").addEventListener("click", function(){ goPage("menu"); });
 document.getElementById("back-to-cart").addEventListener("click", function(){ goPage("cart"); });
