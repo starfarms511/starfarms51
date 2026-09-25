@@ -672,6 +672,7 @@ document.getElementById("btn-send").addEventListener("click",async function(){
     showToast("Commande non envoyée. Vérifie ta connexion et réessaie.");
     btn.disabled=false; btn.textContent=label; return;
   }
+  try{ fetch("/api/notify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:ref}),keepalive:true}).catch(function(){}); }catch(e){}
   var msg="Commande "+ref+"\n"+items.map(function(i){return "- "+i.name+" "+i.weight+" x"+i.qty;}).join("\n")+"\nTotal : "+sub+" €";
   document.getElementById("cf-text").textContent="On te contacte sur Telegram ("+pseudo+") pour confirmer "+(selectedDelivery==="livraison"?"le créneau de livraison.":"le lieu et l'heure du meet-up.");
   document.getElementById("cf-ref").textContent=ref;
