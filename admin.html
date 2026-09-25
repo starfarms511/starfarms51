@@ -80,6 +80,13 @@ tr:last-child td{border-bottom:none}
 .img-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .upload-hint{font-size:13px;color:var(--text2);pointer-events:none;z-index:1}
 .empty{text-align:center;padding:3rem;color:var(--text2)}
+.prod-card{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px}
+.prod-card-img{width:56px;height:56px;border-radius:10px;background:var(--card);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px}
+.prod-card-img img{width:100%;height:100%;object-fit:cover}
+.prod-card-info{flex:1;min-width:0}
+.prod-card-name{font-size:14px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-card-sub{font-size:11px;color:var(--text2);margin-bottom:6px}
+.prod-card-actions{display:flex;gap:6px;flex-shrink:0}
 .empty-icon{font-size:48px;margin-bottom:1rem}
 @media(max-width:768px){
   .sidebar{width:100%;height:60px;bottom:0;top:auto;flex-direction:row;padding:0;border-right:none;border-top:1px solid var(--border);gap:0}
@@ -151,10 +158,7 @@ tr:last-child td{border-bottom:none}
     </div>
     <div class="tab" id="tab-produits">
       <div class="page-title">🌿 Produits <button class="btn btn-green" id="btn-add-product" style="margin-left:auto;font-size:13px">+ Ajouter</button></div>
-      <div class="table-wrap">
-        <table><thead><tr><th>Image</th><th>Nom</th><th>Cat</th><th>Formats</th><th>Video</th><th>Statut</th><th>Actions</th></tr></thead>
-        <tbody id="products-table"></tbody></table>
-      </div>
+      <div id="products-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:1rem"></div>
       <div class="empty" id="prod-empty" style="display:none"><div class="empty-icon">🌱</div><p>Aucun produit</p></div>
     </div>
     <div class="tab" id="tab-visiteurs">
@@ -320,22 +324,26 @@ async function loadProduits() {
   try {
     var products = await sbFetch("products?select=*&order=created_at.asc");
     document.getElementById("prod-empty").style.display = products.length ? "none" : "block";
-    var html = "";
+    var list = document.getElementById("products-list");
+    list.innerHTML = "";
     products.forEach(function(p) {
       var formats = typeof p.formats === "string" ? JSON.parse(p.formats) : (p.formats || []);
-      var fmtStr = formats.map(function(f) { return f.w + " " + f.p + "EUR"; }).join(", ");
-      var imgHtml = p.img ? "<img src='" + p.img + "' style='width:100%;height:100%;object-fit:cover'>" : "<span style='font-size:24px'>" + (p.cat === "Fleurs" ? "F" : "R") + "</span>";
-      html += "<tr>";
-      html += "<td><div style='width:48px;height:48px;border-radius:8px;background:var(--card);overflow:hidden;display:flex;align-items:center;justify-content:center'>" + imgHtml + "</div></td>";
-      html += "<td style='font-weight:700'>" + p.name + "</td>";
-      html += "<td>" + p.cat + "</td>";
-      html += "<td style='font-size:11px;color:var(--text2)'>" + fmtStr + "</td>";
-      html += "<td>" + (p.video ? "Video" : "-") + "</td>";
-      html += "<td><span class='badge " + (p.status === "active" ? "badge-green" : "badge-red") + "'>" + (p.status === "active" ? "Dispo" : "Indispo") + "</span></td>";
-      html += "<td><button class='btn btn-ghost' data-edit='" + p.id + "' style='margin-right:6px'>Edit</button><button class='btn btn-red' data-del='" + p.id + "'>Suppr</button></td>";
-      html += "</tr>";
+      var fmtStr = formats.map(function(f) { return f.w + " " + f.p + "EUR"; }).join(" · ");
+      var card = document.createElement("div");
+      card.className = "prod-card";
+      var imgHtml = p.img ? "<img src='" + p.img + "' alt='" + p.name + "'>" : "<span>" + (p.cat === "Fleurs" ? "🌸" : "🍯") + "</span>";
+      card.innerHTML = "<div class='prod-card-img'>" + imgHtml + "</div>" +
+        "<div class='prod-card-info'>" +
+          "<div class='prod-card-name'>" + p.name + "</div>" +
+          "<div class='prod-card-sub'>" + p.cat + " · " + (p.status === "active" ? "Dispo" : "Indispo") + (p.video ? " · Video" : "") + "</div>" +
+          "<div class='prod-card-sub'>" + fmtStr + "</div>" +
+        "</div>" +
+        "<div class='prod-card-actions'>" +
+          "<button class='btn btn-ghost' data-edit='" + p.id + "'>✏️</button>" +
+          "<button class='btn btn-red' data-del='" + p.id + "'>🗑️</button>" +
+        "</div>";
+      list.appendChild(card);
     });
-    document.getElementById("products-table").innerHTML = html;
     document.querySelectorAll("[data-edit]").forEach(function(btn) {
       btn.addEventListener("click", function() { editProduct(this.dataset.edit); });
     });

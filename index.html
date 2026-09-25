@@ -437,6 +437,17 @@ async function loadCategories() {
   } catch(e) { console.warn("Categories:", e); }
 }
 
+function getTelegramUser() {
+  try {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+      var user = window.Telegram.WebApp.initDataUnsafe.user;
+      if (user && user.username) return "@" + user.username;
+      if (user && user.first_name) return user.first_name;
+    }
+  } catch(e) {}
+  return null;
+}
+
 async function loadProducts(){
   allProducts=DEFAULT;renderProducts(allProducts);
   try{
@@ -452,8 +463,9 @@ async function initApp(){
   history.pushState({page:"menu"},"","");
   goPage("menu");loadProducts();loadCategories();
   try{
+    var tgUser = getTelegramUser();
     visitorId="v_"+Math.random().toString(36).substr(2,9)+"_"+Date.now();
-    await sbFetch("visitors","POST",{id:visitorId,pseudo:null,first_visit:Date.now(),last_visit:Date.now(),visits:1,orders:0});
+    await sbFetch("visitors","POST",{id:visitorId,pseudo:tgUser,first_visit:Date.now(),last_visit:Date.now(),visits:1,orders:0});
   }catch(e){console.warn("Visitor:",e);}
 }
 
