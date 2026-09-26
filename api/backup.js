@@ -50,7 +50,7 @@ module.exports = async (req, res) => {
       ];
     });
     const productRows = products.map(p => [
-      p.id, p.name, p.cat, p.status === "active" ? "Disponible" : "Indisponible",
+      p.id, p.name, p.cat, ({ active: "Disponible", soldout: "Victime de son succès" })[p.status] || "Masqué",
       parseJson(p.formats).map(f => `${f.w} = ${f.p} €`).join(" | "), num(costOf[p.id])
     ]);
 
