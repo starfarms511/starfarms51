@@ -277,6 +277,12 @@ body{background:radial-gradient(120% 45% at 50% -8%,#2A0A4A 0%,rgba(42,10,74,0) 
 .inf-card p{margin:0;font-size:14.5px;line-height:1.5;color:rgba(237,230,255,.72)}
 .inf-steps{margin:0;padding-left:20px;font-size:14.5px;line-height:1.6;color:rgba(237,230,255,.72)}
 .inf-steps li::marker{color:#7CFF2E;font-weight:700}
+.pcard.is-sold .pcard-media{filter:grayscale(.85) brightness(.55)}
+.pcard.is-sold .pcard-price{opacity:.55}
+.pcard-sold{background:linear-gradient(90deg,#FF8A3D,#F5C542)!important;color:#2A0E00!important;box-shadow:0 0 12px rgba(255,138,61,.55)!important}
+.pd-add.is-sold{opacity:1;cursor:not-allowed;color:#2A0E00;background:linear-gradient(180deg,#FFD08A 0%,#FFA24D 50%,#F07A1E 100%);box-shadow:0 5px 0 #9A4108,0 10px 24px rgba(255,138,61,.28)}
+.pd-add.is-sold{justify-content:center}
+.pd-add.is-sold b{display:none}
 </style>
 </head>
 <body>
@@ -493,13 +499,14 @@ function renderProducts(list){
     document.getElementById("pempty-btn").addEventListener("click",function(){ if(q){clearSearch();} else {setCat("all");} });
     return;
   }
+  list=list.slice().sort(function(x,y){ return (x.status==="soldout")-(y.status==="soldout"); });
   grid.innerHTML=list.map(function(p){
     var f=p.formats||[], m=minFormat(p);
     var media=p.img?"<img src='"+esc(p.img)+"' alt='' loading='lazy' decoding='async'>":"<span class='pcard-ph'>"+esc(catEmoji[p.cat]||"🌿")+"</span>";
     var price=m?(f.length>1?"<span class='pcard-price'>dès <b>"+esc(m.p)+" €</b></span>":"<span class='pcard-price'><b>"+esc(m.p)+" €</b> les "+esc(m.w)+"</span>"):"";
-    return "<button type='button' class='pcard' data-pid='"+esc(p.id)+"'>"+
+    return "<button type='button' class='pcard"+(p.status==="soldout"?" is-sold":"")+"' data-pid='"+esc(p.id)+"'>"+
       "<span class='pcard-media'>"+media+"</span><span class='pcard-shade'></span>"+
-      (isNewProduct(p)?"<span class='pcard-new'>Nouveau</span>":"")+
+      (p.status==="soldout"?"<span class='pcard-new pcard-sold'>🔥 Victime de son succès</span>":(isNewProduct(p)?"<span class='pcard-new'>Nouveau</span>":""))+
       "<span class='pcard-info'><span class='pcard-cat'>"+esc(p.cat)+"</span><span class='pcard-name'>"+esc(p.name)+"</span>"+price+"</span></button>";
   }).join("");
   grid.querySelectorAll(".pcard").forEach(function(c){ c.addEventListener("click",function(){ openProduct(this.dataset.pid); }); });
@@ -550,7 +557,6 @@ function openProduct(id){
     var u=perGram(x);
     return "<button type='button' class='fmt"+(i===0?" selected":"")+"' data-idx='"+i+"'><span class='fmt-w'>"+esc(x.w)+"</span><span class='fmt-p'>"+fmtEur(x.p)+"</span>"+(u?"<span class='fmt-u'>"+u+"</span>":"")+"</button>";
   }).join("");
-  document.getElementById("btn-add-cart").disabled=!f.length;
   updateCTA();
   goPage("product");
 }
@@ -647,7 +653,7 @@ function getTelegramUser() {
 async function loadProducts(){
   renderSkeleton();
   try{
-    var data=await sbFetch("products?select=*&status=eq.active&order=created_at.desc");
+    var data=await sbFetch("products?select=*&status=in.(active,soldout)&order=created_at.desc");
     allProducts=(data||[]).map(function(p){ return Object.assign({},p,{formats:typeof p.formats==="string"?JSON.parse(p.formats):(p.formats||[])}); });
     productsLoaded=true;
     filterProducts();
@@ -684,7 +690,7 @@ document.getElementById("hdr-cart-product").addEventListener("click",function(){
 document.getElementById("qty-minus").addEventListener("click",function(){currentQty=Math.max(1,currentQty-1);document.getElementById("qty-val").textContent=currentQty;});
 document.getElementById("qty-plus").addEventListener("click",function(){currentQty++;document.getElementById("qty-val").textContent=currentQty;});
 document.getElementById("btn-add-cart").addEventListener("click",function(){
-  if(!currentProduct)return;
+  if(!currentProduct||currentProduct.status==="soldout")return;
   var fmt=currentProduct.formats[currentFmtIdx];
   var ex=null;for(var i=0;i<cart.length;i++){if(cart[i].id===currentProduct.id&&cart[i].weight===fmt.w){ex=cart[i];break;}}
   if(ex)ex.qty+=currentQty;
@@ -719,7 +725,12 @@ document.getElementById("btn-send").addEventListener("click",async function(){
     ]);
   }catch(err){
     console.warn("Order save:",err);
-    showToast("Commande non envoyée. Vérifie ta connexion et réessaie.");
+    var so=String(err&&err.message||"").match(/SF_SOLDOUT:([^"\\]+)/);
+    if(so){
+      var nm=so[1].trim();
+      allProducts.forEach(function(p){ if(p.name===nm) p.status="soldout"; });
+      showToast("« "+nm+" » vient d'être victime de son succès. Retire-le du panier pour commander.");
+    } else showToast("Commande non envoyée. Vérifie ta connexion et réessaie.");
     btn.disabled=false; btn.innerHTML=label; return;
   }
   try{ fetch("/api/notify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:ref}),keepalive:true}).catch(function(){}); }catch(e){}
@@ -775,7 +786,15 @@ document.getElementById("search-input").addEventListener("keydown",function(e){ 
 
 function fmtEur(n){ n=Number(n)||0; var r=Math.round(n*100)/100; return (r%1===0?String(r):r.toFixed(2)).replace(".",",")+" €"; }
 function perGram(x){ var m=String(x.w||"").trim().match(/^(\d+(?:[.,]\d+)?)\s*(g|kg)$/i); if(!m) return ""; var g=parseFloat(m[1].replace(",","."))*(m[2].toLowerCase()==="kg"?1000:1); if(!g) return ""; return (Number(x.p)/g).toFixed(2).replace(".",",")+" €/g"; }
-function updateCTA(){ if(!currentProduct) return; var f=(currentProduct.formats||[])[currentFmtIdx]; document.getElementById("pd-total").textContent=fmtEur(f?Number(f.p)*currentQty:0); }
+function updateCTA(){
+  if(!currentProduct) return;
+  var btn=document.getElementById("btn-add-cart"), sold=currentProduct.status==="soldout";
+  var f=(currentProduct.formats||[])[currentFmtIdx];
+  btn.classList.toggle("is-sold",sold);
+  btn.disabled=sold||!(currentProduct.formats||[]).length;
+  btn.querySelector("span").textContent=sold?"🔥 Victime de son succès":"Ajouter au panier";
+  document.getElementById("pd-total").textContent=sold?"":fmtEur(f?Number(f.p)*currentQty:0);
+}
 function pop(el){ if(!el) return; el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); }
 document.getElementById("pd-formats").addEventListener("click",function(e){
   var b=e.target.closest(".fmt"); if(!b) return;
