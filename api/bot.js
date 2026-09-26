@@ -52,7 +52,6 @@ module.exports = async (req, res) => {
           parse_mode: "HTML",
           caption:
             `👽 Salut${name}, bienvenue chez <b>Star'Farms 51</b> !\n\n` +
-            `🌿 Fleurs et résines CBD sélectionnées\n` +
             `🚀 Livraison et meet-up à Reims\n\n` +
             `Appuie sur <b>STAR'FARMS MENU</b> pour ouvrir la boutique 👇`,
           reply_markup: KEYBOARD
