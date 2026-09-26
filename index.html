@@ -710,7 +710,7 @@ document.getElementById("btn-send").addEventListener("click",async function(){
   if(selectedDelivery==="livraison"&&!document.getElementById("co-addr").value.trim()){flagField("co-addr","Indique ton adresse de livraison");return;}
   var notes=document.getElementById("co-notes").value.trim();
   var ref="SF"+Date.now().toString(36).toUpperCase();
-  var items=cart.map(function(i){return{name:i.name,weight:i.weight,price:i.price,qty:i.qty};});
+  var items=cart.map(function(i){return{id:i.id,name:i.name,weight:i.weight,price:i.price,qty:i.qty};});
   btn.disabled=true; var label=btn.innerHTML; btn.textContent="Envoi en cours…";
   try{
     await Promise.race([
