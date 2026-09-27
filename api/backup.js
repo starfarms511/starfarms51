@@ -39,14 +39,14 @@ module.exports = async (req, res) => {
     let ca = 0, profit = 0;
     const orderRows = orders.map(o => {
       const items = parseJson(o.items).map(i => `${i.name} ${i.weight || ""} x${i.qty}`).join(" | ");
-      const total = Number(o.total) || 0;
-      const p = o.cost_total === null || o.cost_total === undefined ? null : total - Number(o.cost_total);
-      ca += total; if (p !== null) profit += p;
+      const total = Number(o.total) || 0, disc = Number(o.discount) || 0, paid = total - disc;
+      const p = o.cost_total === null || o.cost_total === undefined ? null : paid - Number(o.cost_total);
+      ca += paid; if (p !== null) profit += p;
       return [
         o.id,
         o.date ? new Date(Number(o.date)).toLocaleString("fr-FR", { timeZone: TZ }) : "",
         o.pseudo, o.phone, o.delivery === "livraison" ? "Livraison" : "Meet-up", o.address,
-        items, num(total), num(o.cost_total), num(p), o.cost_complete === true ? "oui" : "non", o.notes
+        items, num(total), num(disc), num(paid), num(o.cost_total), num(p), o.cost_complete === true ? "oui" : "non", o.notes
       ];
     });
     const productRows = products.map(p => [
@@ -56,7 +56,7 @@ module.exports = async (req, res) => {
 
     const day = new Date().toLocaleDateString("fr-CA", { timeZone: TZ });
     const files = [
-      [`commandes-${day}.csv`, toCsv(["Référence", "Date", "Pseudo", "Téléphone", "Mode", "Adresse", "Articles", "Total €", "Coût €", "Profit €", "Coût complet", "Notes"], orderRows)],
+      [`commandes-${day}.csv`, toCsv(["Référence", "Date", "Pseudo", "Téléphone", "Mode", "Adresse", "Articles", "Total €", "Remise €", "Encaissé €", "Coût €", "Profit €", "Coût complet", "Notes"], orderRows)],
       [`produits-${day}.csv`, toCsv(["ID", "Nom", "Catégorie", "Statut", "Formats", "Prix d'achat €/g"], productRows)]
     ];
     const caption = `💾 Sauvegarde du ${new Date().toLocaleDateString("fr-FR", { timeZone: TZ })}\n${orders.length} commande${orders.length > 1 ? "s" : ""} · CA ${euros(ca)} · profit ${euros(profit)}\n${products.length} produit${products.length > 1 ? "s" : ""}`;
