@@ -285,6 +285,28 @@ body{background:radial-gradient(120% 45% at 50% -8%,#2A0A4A 0%,rgba(42,10,74,0) 
 .cf-text b{color:#fff}
 .cf-send{display:block;text-align:center;text-decoration:none;margin-top:20px}
 .cf-ghost{width:100%;margin-top:12px;padding:15px 0;border-radius:16px;cursor:pointer;font:700 15px 'Outfit',Arial,sans-serif;color:#EDE6FF;background:rgba(176,38,255,.12);border:1px solid rgba(176,38,255,.45)}
+.co-next{margin-top:12px;padding:12px 14px;border-radius:14px;font-size:13.5px;line-height:1.5;color:#E3F9D0;background:rgba(124,255,46,.08);border:1px solid rgba(124,255,46,.35)}
+.co-next b{color:#fff}
+.cf-wrap{padding-top:22px}
+.cf-steps{display:flex;align-items:center;gap:8px;width:100%;max-width:340px;margin-bottom:18px}
+.cf-step{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:rgba(237,230,255,.6);white-space:nowrap}
+.cf-step span{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.cf-step.done span{background:rgba(124,255,46,.18);color:#7CFF2E;border:1px solid rgba(124,255,46,.5)}
+.cf-step.now{color:#fff}
+.cf-step.now span{background:#7CFF2E;color:#0C2300;box-shadow:0 0 12px rgba(124,255,46,.6)}
+.cf-sep{flex:1;height:2px;min-width:14px;border-radius:2px;background:linear-gradient(90deg,rgba(124,255,46,.6),rgba(124,255,46,.15))}
+.cf-title{margin:0 0 8px}
+.cf-send{margin-top:18px;font-size:17px;padding:19px 0}
+.pulse{animation:cfpulse 1.6s ease-in-out infinite}
+@keyframes cfpulse{0%,100%{box-shadow:0 5px 0 #237A05,0 0 0 0 rgba(124,255,46,.55)}50%{box-shadow:0 5px 0 #237A05,0 0 0 12px rgba(124,255,46,0)}}
+.shake{animation:cfshake .45s ease}
+@keyframes cfshake{20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.cf-warn{margin-top:12px;font-size:13.5px;line-height:1.45;color:#F7E3A8}
+.cf-howto{width:100%;margin:16px 0 0;padding:14px 16px 14px 36px;border-radius:16px;text-align:left;font-size:14px;line-height:1.7;color:rgba(237,230,255,.8);background:rgba(237,230,255,.04);border:1px solid rgba(237,230,255,.1)}
+.cf-howto li::marker{color:#7CFF2E;font-weight:800}
+.cf-howto b{color:#fff}
+@media (prefers-reduced-motion:reduce){.pulse,.shake{animation:none}}
+#page-confirm{padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
 </style>
 </head>
 <body>
@@ -397,17 +419,28 @@ body{background:radial-gradient(120% 45% at 50% -8%,#2A0A4A 0%,rgba(42,10,74,0) 
       <h2 class="co-h">Récapitulatif</h2>
       <div id="co-recap"></div>
       <div class="ct-sum-row total"><span>Total</span><b id="co-total">0 €</b></div>
+      <p class="co-next">📲 En validant, Telegram s'ouvre avec ta commande <b>déjà rédigée</b> : tu n'auras plus qu'à appuyer sur <b>Envoyer</b>.</p>
     </section>
   </div>
-  <div class="pd-cta"><button type="button" class="pd-add" id="btn-send"><span>Envoyer la commande</span><b id="co-send-total">0 €</b></button></div>
+  <div class="pd-cta"><button type="button" class="pd-add" id="btn-send"><span>📲 Envoyer sur Telegram</span><b id="co-send-total">0 €</b></button></div>
 </div>
 
 <div class="page" id="page-confirm">
   <div class="cf-wrap">
-    <div class="cf-ico">🛸</div>
-    <h1 class="cf-title">Commande enregistrée</h1>
+    <div class="cf-steps">
+      <div class="cf-step done"><span>✓</span>Commande préparée</div>
+      <div class="cf-sep"></div>
+      <div class="cf-step now"><span>2</span>Envoi sur Telegram</div>
+    </div>
+    <h1 class="cf-title" id="cf-title">Plus qu'une étape !</h1>
     <p class="cf-text" id="cf-text"></p>
-    <a class="cf-btn cf-send" id="cf-tg" href="#">📲 Envoyer ma commande sur Telegram</a>
+    <a class="cf-btn cf-send pulse" id="cf-tg" href="#">📲 Envoyer ma commande</a>
+    <p class="cf-warn" id="cf-warn">⚠️ Ta commande ne sera préparée qu'après réception de ton message.</p>
+    <ol class="cf-howto">
+      <li>Appuie sur le bouton vert</li>
+      <li>Telegram s'ouvre avec ta commande <b>déjà écrite</b></li>
+      <li>Appuie sur <b>Envoyer</b> ➤ dans Telegram</li>
+    </ol>
     <div class="cf-card">
       <div class="cf-row"><span>Référence</span><b id="cf-ref"></b></div>
       <div class="cf-row"><span>Mode</span><b id="cf-mode"></b></div>
@@ -431,7 +464,7 @@ body{background:radial-gradient(120% 45% at 50% -8%,#2A0A4A 0%,rgba(42,10,74,0) 
   <div class="inf-list">
     <section class="inf-card"><div class="inf-ico">🚚</div><div><h2>Livraison</h2><p>Reims et alentours, dès 50 € de commande. Gratuite à Reims. Hors Reims, les frais éventuels te sont confirmés sur Telegram.</p></div></section>
     <section class="inf-card"><div class="inf-ico">🤝</div><div><h2>Meet-up</h2><p>Rendez-vous à Reims, dès 50 € de commande. Le lieu et l'heure te sont proposés sur Telegram.</p></div></section>
-    <section class="inf-card"><div class="inf-ico">🛸</div><div><h2>Comment commander</h2><ol class="inf-steps"><li>Choisis tes produits et leur format.</li><li>Valide ta commande avec ton pseudo et ton numéro.</li><li>On te contacte sur Telegram pour confirmer.</li></ol></div></section>
+    <section class="inf-card"><div class="inf-ico">🛸</div><div><h2>Comment commander</h2><ol class="inf-steps"><li>Choisis tes produits et leur format.</li><li>Valide ta commande avec ton pseudo et ton numéro.</li><li>Envoie le message pré-rempli sur Telegram : on te confirme ensuite.</li></ol></div></section>
   </div>
 </div>
 
@@ -472,7 +505,7 @@ function goPage(page){
   document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");p.style.display="";});
   if(page!=="splash")document.getElementById("page-splash").style.display="none";
   document.getElementById("page-"+page).classList.add("active");
-  document.getElementById("bottom-nav").style.display=(page==="splash"||page==="product"||page==="checkout")?"none":"flex";
+  document.getElementById("bottom-nav").style.display=(page==="splash"||page==="product"||page==="checkout"||page==="confirm")?"none":"flex";
   document.querySelectorAll(".nav-item").forEach(function(n){n.classList.remove("active");});
   var map={menu:"nav-menu",cart:"nav-cart",infos:"nav-infos",contact:"nav-contact"};
   if(map[page])document.getElementById(map[page]).classList.add("active");
@@ -741,7 +774,8 @@ document.getElementById("btn-send").addEventListener("click",async function(){
   if(notes) L.push("📝 Notes : "+notes);
   var msg=L.join("\n");
   var seller="@"+CONTACT_URL.replace(/\/+$/,"").split("/").pop();
-  document.getElementById("cf-text").innerHTML="<b>Dernière étape :</b> appuie sur le bouton ci-dessous pour envoyer ta commande à "+esc(seller)+". Le message est déjà rédigé, il te suffit d'appuyer sur Envoyer dans Telegram. On te confirme ensuite "+(selectedDelivery==="livraison"?"le créneau de livraison.":"le lieu et l'heure du meet-up.");
+  document.getElementById("cf-text").innerHTML="Envoie-la à <b>"+esc(seller)+"</b> sur Telegram pour qu'on la prépare.";
+  resetConfirm();
   document.getElementById("cf-ref").textContent=ref;
   document.getElementById("cf-mode").textContent=selectedDelivery==="livraison"?"Livraison":"Meet-up";
   document.getElementById("cf-items").innerHTML=items.map(function(i){return "<div class='cf-item'><span>"+esc(i.name)+" · "+esc(i.weight)+" ×"+esc(i.qty)+"</span><span>"+esc(i.price*i.qty)+" €</span></div>";}).join("");
@@ -753,7 +787,14 @@ document.getElementById("btn-send").addEventListener("click",async function(){
   ["co-notes"].forEach(function(id){document.getElementById(id).value="";});
   goPage("confirm");
 });
-document.getElementById("cf-back").addEventListener("click",function(){goPage("menu");});
+document.getElementById("cf-back").addEventListener("click",function(){
+  if(!CF_OPENED&&!CF_WARNED){
+    CF_WARNED=true; showToast("👆 N'oublie pas d'envoyer ta commande sur Telegram, sinon elle ne sera pas préparée.");
+    var b=document.getElementById("cf-tg"); b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
+    window.scrollTo({top:0,behavior:"smooth"}); return;
+  }
+  goPage("menu");
+});
 
 
 (function(){
@@ -842,11 +883,29 @@ function openTg(url){
   ch.addEventListener("click",function(){ openTg(CHANNEL_URL); });
   sp.addEventListener("click",function(e){ e.preventDefault(); openTg(CHANNEL_URL); });
   document.getElementById("cf-tg").addEventListener("click",function(e){
-    e.preventDefault(); var u=this.href;
+    e.preventDefault(); var u=this.href; CF_OPENED=true; setTimeout(markReturned,1500);
     try{ if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData&&Telegram.WebApp.openTelegramLink){ Telegram.WebApp.openTelegramLink(u); return; } }catch(err){}
     window.location.href=u;
   });
 })();
+
+var CF_OPENED=false, CF_WARNED=false;
+function resetConfirm(){
+  CF_OPENED=false; CF_WARNED=false;
+  document.getElementById("cf-title").textContent="Plus qu'une étape !";
+  var b=document.getElementById("cf-tg"); b.textContent="📲 Envoyer ma commande"; b.classList.add("pulse");
+  document.getElementById("cf-warn").hidden=false;
+  document.getElementById("cf-back").textContent="Retour au catalogue";
+}
+function markReturned(){
+  if(!CF_OPENED) return;
+  document.getElementById("cf-title").textContent="Message envoyé ?";
+  document.getElementById("cf-text").innerHTML="Si tu as bien appuyé sur <b>Envoyer</b> dans Telegram, c'est tout bon ✓ On te répond très vite.";
+  var b=document.getElementById("cf-tg"); b.textContent="📲 Rouvrir Telegram"; b.classList.remove("pulse");
+  document.getElementById("cf-warn").hidden=true;
+  document.getElementById("cf-back").textContent="C'est envoyé, retour au catalogue";
+}
+document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible") markReturned(); });
 </script>
 </body>
 </html>
