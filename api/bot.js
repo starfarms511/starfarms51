@@ -8,8 +8,8 @@ const CONTACT_URL = "https://t.me/laligue51_com";
 const KEYBOARD = {
   inline_keyboard: [
     [{ text: "🛸 STAR'FARMS MENU", web_app: { url: SHOP_URL } }],
-    [{ text: "📢 CANAL TELEGRAM", url: CHANNEL_URL }],
-    [{ text: "💬 CONTACT", url: CONTACT_URL }]
+    [{ text: "🌌 CANAL TELEGRAM", url: CHANNEL_URL }],
+    [{ text: "🛰️ CONTACT", url: CONTACT_URL }]
   ]
 };
 
@@ -51,15 +51,14 @@ module.exports = async (req, res) => {
           photo: IMAGE_URL,
           parse_mode: "HTML",
           caption:
-            `👽 Salut${name}, bienvenue chez <b>Star'Farms 51</b> !\n\n` +
-            `🚀 Livraison et meet-up à Reims\n\n` +
-            `Appuie sur <b>STAR'FARMS MENU</b> pour ouvrir la boutique 👇`,
+            `🛸 Bienvenue chez <b>Star'Farms V2</b>${name ? "," + name : ""} 🌌\n\n` +
+            `🛰️ Appuie sur <b>STAR'FARMS MENU</b> pour ouvrir le shop 👇`,
           reply_markup: KEYBOARD
         });
       } else {
         await tg("sendMessage", {
           chat_id: chatId,
-          text: "👽 Pour commander, ouvre la boutique avec le bouton ci-dessous.\nPour une question, écris-nous via Contact.",
+          text: "🛸 Pour commander, ouvre la boutique avec le bouton ci-dessous.\n🛰️ Pour une question, passe par Contact.",
           reply_markup: KEYBOARD
         });
       }
