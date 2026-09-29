@@ -1,7 +1,7 @@
 // Vercel : webhook du bot Telegram. Répond à /start avec la carte de bienvenue.
 // Variables Vercel : TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET
 const SHOP_URL = "https://starfarms-51.vercel.app/";
-const IMAGE_URL = "https://starfarms-51.vercel.app/bienvenue.jpg";
+const IMAGE_URL = "https://starfarms-51.vercel.app/bienvenue2.jpg";
 const CHANNEL_URL = "https://t.me/+uYWHra2ouU0zNmY0";
 const CONTACT_URL = "https://t.me/laligue51_com";
 
