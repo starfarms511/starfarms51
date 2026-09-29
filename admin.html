@@ -216,6 +216,15 @@ button{font-family:inherit}
 .disc-clear{display:block;margin:14px auto 0;color:#FF9C9C}
 .mp-row.disc-row{background:rgba(255,138,61,.08);border-color:rgba(255,138,61,.4)}
 .mp-row.disc-row span:last-child{color:#FFC08A}
+.loglist{display:flex;flex-direction:column;gap:8px}
+.logrow{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:14px;background:rgba(6,0,13,.35);border:1px solid var(--line)}
+.logdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.logrow.ok .logdot{background:var(--lime);box-shadow:0 0 8px rgba(124,255,46,.6)}
+.logrow.ko .logdot{background:var(--red)}
+.logmain{flex:1;min-width:0}
+.logtop{font-size:14.5px;font-weight:600;color:#fff}
+.logsub{margin-top:2px;font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logtime{font-size:12.5px;color:var(--muted);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -239,7 +248,8 @@ button{font-family:inherit}
       <button class="nav-btn" id="nav-commandes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/></svg><span>Commandes</span></button>
       <button class="nav-btn" id="nav-produits"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21c0-6 4-10 9-11-1 6-4 10-9 11zM12 21c0-6-4-10-9-11 1 6 4 10 9 11zM12 21V9M12 9c0-3 1.5-5 3-6-1.5 1-3 3-3 6zM12 9c0-3-1.5-5-3-6 1.5 1 3 3 3 6z"/></svg><span>Produits</span></button>
       <button class="nav-btn" id="nav-categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span>Catégories</span></button>
-      <button class="nav-btn" id="nav-visiteurs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.7 2.6 3 5.2"/></svg><span>Visiteurs</span></button>
+      <button class="nav-btn" id="nav-securite"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></span><span>Sécurité</span></button>
+    <button class="nav-btn" id="nav-visiteurs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.7 2.6 3 5.2"/></svg><span>Visiteurs</span></button>
     </nav>
     <div class="sidebar-bottom"><button class="logout-btn" id="logout-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H3"/></svg><span>Déconnexion</span></button></div>
   </aside>
@@ -276,6 +286,19 @@ button{font-family:inherit}
       <div class="page-title"><h1>Catégories</h1><button class="btn btn-green" id="btn-add-cat">+ Ajouter</button></div>
       <div class="clist" id="categories-table"></div>
       <div class="empty" id="cat-empty" style="display:none"><div class="empty-icon">🏷️</div><p>Aucune catégorie.</p></div>
+    </section>
+    <section class="tab" id="tab-securite">
+      <div class="page-title"><h1>Sécurité</h1></div>
+      <div class="warn" id="sec-alert" hidden><div><b id="sec-alert-t"></b><p id="sec-alert-p"></p></div></div>
+      <div class="kpis two">
+        <div class="kpi"><div class="kpi-l">Connexions réussies (30 j)</div><div class="kpi-v stat-green" id="sec-ok">0</div></div>
+        <div class="kpi"><div class="kpi-l">Échecs (30 j)</div><div class="kpi-v" id="sec-ko">0</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Journal des accès</h2><button class="link" id="sec-refresh">Rafraîchir</button></div>
+        <div class="loglist" id="sec-log"></div>
+      </div>
+      <p class="muted-line" style="padding:0 2px">Après 5 échecs de connexion d'affilée, l'accès est bloqué quelques minutes sur cet appareil. Le journal conserve les 500 derniers accès.</p>
     </section>
     <section class="tab" id="tab-visiteurs">
       <div class="page-title"><h1>Visiteurs</h1></div>
@@ -440,7 +463,7 @@ function showTab(name) {
   document.querySelectorAll(".nav-btn").forEach(function(b) { b.classList.remove("active"); });
   document.getElementById("tab-" + name).classList.add("active");
   document.getElementById("nav-" + name).classList.add("active");
-  var fns = { dashboard: loadDashboard, commandes: loadCommandes, produits: loadProduits, visiteurs: loadVisiteurs, categories: loadCategories };
+  var fns = { dashboard: loadDashboard, commandes: loadCommandes, produits: loadProduits, visiteurs: loadVisiteurs, categories: loadCategories, securite: loadSecurite };
   if (fns[name]) fns[name]();
 }
 
@@ -676,18 +699,32 @@ async function deleteProduct(id) {
   } catch(e) { showToast("Erreur"); }
 }
 
+function lockState() { try { return JSON.parse(localStorage.getItem("sf51_login_lock") || "{}") || {}; } catch (e) { return {}; } }
+function lockRemaining() { var s = lockState(); return s.until && s.until > Date.now() ? Math.ceil((s.until - Date.now()) / 1000) : 0; }
+async function logAccess(email, ok) {
+  try { await fetch(SB_URL + "/rest/v1/rpc/log_admin_access", { method: "POST", headers: { apikey: SB_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ p_email: email, p_success: ok, p_device: deviceLabel() }) }); } catch (e) {}
+}
 async function doLogin() {
+  var err = document.getElementById("login-err"); err.style.display = "none";
+  var wait = lockRemaining();
+  if (wait > 0) { err.textContent = "Trop de tentatives. Réessaie dans " + wait + " s."; err.style.display = "block"; return; }
   var email = document.getElementById("email-input").value.trim();
   var pwd = document.getElementById("pwd-input").value;
-  var err = document.getElementById("login-err"); err.style.display = "none";
   if (!email || !pwd) { err.textContent = "Renseigne ton email et ton mot de passe."; err.style.display = "block"; return; }
   var btn = document.getElementById("login-btn"); btn.disabled = true; btn.textContent = "Connexion…";
   try {
     saveSession(await authRequest("password", { email: email, password: pwd }));
     document.getElementById("pwd-input").value = "";
+    localStorage.removeItem("sf51_login_lock");
+    logAccess(email, true);
     showAdmin();
   } catch (e) {
-    err.textContent = /invalid/i.test(e.message) ? "Email ou mot de passe incorrect." : e.message;
+    var s = lockState(); var fails = (s.fails || 0) + 1; var lock = { fails: fails };
+    if (fails >= 5) { lock.until = Date.now() + Math.min(15, fails - 4) * 60000; lock.fails = fails; }
+    try { localStorage.setItem("sf51_login_lock", JSON.stringify(lock)); } catch (e2) {}
+    logAccess(email, false);
+    if (lock.until) err.textContent = "Trop de tentatives. Accès bloqué " + Math.ceil((lock.until - Date.now()) / 60000) + " min sur cet appareil.";
+    else err.textContent = /invalid/i.test(e.message) ? "Email ou mot de passe incorrect (" + (5 - fails) + " essai" + (5 - fails > 1 ? "s" : "") + " avant blocage)." : e.message;
     err.style.display = "block";
   } finally { btn.disabled = false; btn.textContent = "Connexion"; }
 }
@@ -718,16 +755,35 @@ document.getElementById("btn-cancel-modal").addEventListener("click", closeModal
 document.getElementById("img-file-input").addEventListener("change", function(e) {
   var file = e.target.files[0];
   if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(ev) {
-    currentImg = ev.target.result;
+  if (!/^image\//.test(file.type)) { showToast("Choisis une image"); return; }
+  sanitizeImage(file).then(function(dataUrl) {
+    currentImg = dataUrl;
     var area = document.getElementById("img-upload-area");
     var img = area.querySelector("img.preview") || document.createElement("img");
     img.className = "preview"; img.src = currentImg;
     area.appendChild(img);
-  };
-  reader.readAsDataURL(file);
+  }).catch(function() { showToast("Image illisible, réessaie"); });
 });
+// Redessine l'image dans un canvas : ne conserve que les pixels.
+// Toutes les métadonnées (GPS, modèle d'appareil, date) sont supprimées. Redimensionne à 1280 px max.
+function sanitizeImage(file) {
+  return new Promise(function(resolve, reject) {
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function() {
+      try {
+        var MAX = 1280, w = img.naturalWidth, h = img.naturalHeight;
+        if (Math.max(w, h) > MAX) { var r = MAX / Math.max(w, h); w = Math.round(w * r); h = Math.round(h * r); }
+        var c = document.createElement("canvas"); c.width = w; c.height = h;
+        var ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL("image/jpeg", 0.85));
+      } catch (err) { URL.revokeObjectURL(url); reject(err); }
+    };
+    img.onerror = function() { URL.revokeObjectURL(url); reject(new Error("decode")); };
+    img.src = url;
+  });
+}
 document.getElementById("product-modal").addEventListener("click", function(e) {
   if (e.target === this) closeModal();
 });
@@ -1010,6 +1066,37 @@ document.getElementById("btn-save-disc").addEventListener("click", function() {
 document.getElementById("btn-clear-disc").addEventListener("click", function() { saveDiscount(0); });
 document.getElementById("btn-cancel-disc").addEventListener("click", closeDiscount);
 document.getElementById("disc-modal").addEventListener("click", function(e) { if (e.target === this) closeDiscount(); });
+
+function deviceLabel() {
+  var ua = navigator.userAgent || "";
+  var os = /iPhone|iPad|iPod/.test(ua) ? "iPhone" : /Android/.test(ua) ? "Android" : /Mac/.test(ua) ? "Mac" : /Windows/.test(ua) ? "Windows" : /Linux/.test(ua) ? "Linux" : "Appareil";
+  var br = /CriOS|Chrome/.test(ua) ? "Chrome" : /Firefox/.test(ua) ? "Firefox" : /Safari/.test(ua) ? "Safari" : "";
+  return (os + (br ? " · " + br : "")).slice(0, 60);
+}
+async function loadSecurite() {
+  try {
+    var rows = await sbFetch("admin_access_log?select=*&order=at.desc&limit=200");
+    var from = Date.now() - 30 * 86400000;
+    var recent = rows.filter(function (r) { return new Date(r.at).getTime() >= from; });
+    var ok = recent.filter(function (r) { return r.success; }).length;
+    var ko = recent.length - ok;
+    document.getElementById("sec-ok").textContent = ok;
+    document.getElementById("sec-ko").textContent = ko;
+    var streak = 0;
+    for (var i = 0; i < rows.length; i++) { if (rows[i].success) break; streak++; }
+    var al = document.getElementById("sec-alert");
+    if (streak >= 3) {
+      al.hidden = false;
+      document.getElementById("sec-alert-t").textContent = streak + " échec" + (streak > 1 ? "s" : "") + " de connexion d'affilée.";
+      document.getElementById("sec-alert-p").textContent = "Si ce n'est pas toi, change ton mot de passe Supabase et active la double authentification.";
+    } else al.hidden = true;
+    document.getElementById("sec-log").innerHTML = rows.length ? rows.map(function (r) {
+      return "<div class='logrow " + (r.success ? "ok" : "ko") + "'><span class='logdot'></span><div class='logmain'><div class='logtop'>" + (r.success ? "Connexion réussie" : "Échec de connexion") + "</div><div class='logsub'>" + esc(r.email || "—") + " · " + esc(r.device || "appareil inconnu") + "</div></div><div class='logtime'>" + fmtDate(new Date(r.at).getTime()) + "</div></div>";
+    }).join("") : "<div class='muted-line'>Aucun accès enregistré pour l'instant.</div>";
+  } catch (e) { console.error(e); showToast("Erreur : " + e.message); }
+}
+document.getElementById("nav-securite").addEventListener("click", function () { showTab("securite"); });
+document.getElementById("sec-refresh").addEventListener("click", loadSecurite);
 </script>
 </body>
 </html>
