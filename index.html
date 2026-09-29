@@ -307,6 +307,7 @@ body{background:radial-gradient(120% 45% at 50% -8%,#2A0A4A 0%,rgba(42,10,74,0) 
 .cf-howto b{color:#fff}
 @media (prefers-reduced-motion:reduce){.pulse,.shake{animation:none}}
 #page-confirm{padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
+.hp-field{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
 </style>
 </head>
 <body>
@@ -390,6 +391,7 @@ body{background:radial-gradient(120% 45% at 50% -8%,#2A0A4A 0%,rgba(42,10,74,0) 
     <div><h1 class="pg-title">Finaliser la commande</h1></div>
   </div>
   <div class="co-wrap">
+    <div class="hp-field" aria-hidden="true"><label>Ne rien écrire ici<input type="text" id="hp-site" tabindex="-1" autocomplete="off"></label></div>
     <section class="co-card">
       <h2 class="co-h">Tes coordonnées</h2>
       <label class="co-field"><span>Pseudo Telegram</span><input id="tg-pseudo" type="text" placeholder="@tonpseudo" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
@@ -633,6 +635,7 @@ function renderCart(){
 }
 
 function renderCheckout(){
+  window.__checkoutAt=Date.now();
   var sub=cartTotal();
   document.getElementById("co-recap").innerHTML=cart.map(function(it){
     return "<div class='co-recap-row'><span>"+esc(it.name)+" · "+esc(it.weight)+" ×"+it.qty+"</span><span>"+fmtEur(it.price*it.qty)+"</span></div>";
@@ -739,6 +742,8 @@ document.getElementById("search-input").addEventListener("input",filterProducts)
 
 document.getElementById("btn-send").addEventListener("click",async function(){
   var btn=this;
+  if(document.getElementById("hp-site").value){ goPage("menu"); return; }
+  if(!window.__checkoutAt || Date.now()-window.__checkoutAt < 2500){ showToast("Prends le temps de vérifier ta commande."); return; }
   var pseudo=document.getElementById("tg-pseudo").value.trim();
   if(!pseudo){flagField("tg-pseudo","Entre ton pseudo Telegram");return;}
   var phone=document.getElementById("co-phone").value.trim();
