@@ -282,6 +282,9 @@ body{background:radial-gradient(120% 45% at 50% -8%,#2A0A4A 0%,rgba(42,10,74,0) 
 .pd-add.is-sold{opacity:1;cursor:not-allowed;color:#2A0E00;background:linear-gradient(180deg,#FFD08A 0%,#FFA24D 50%,#F07A1E 100%);box-shadow:0 5px 0 #9A4108,0 10px 24px rgba(255,138,61,.28)}
 .pd-add.is-sold{justify-content:center}
 .pd-add.is-sold b{display:none}
+.cf-text b{color:#fff}
+.cf-send{display:block;text-align:center;text-decoration:none;margin-top:20px}
+.cf-ghost{width:100%;margin-top:12px;padding:15px 0;border-radius:16px;cursor:pointer;font:700 15px 'Outfit',Arial,sans-serif;color:#EDE6FF;background:rgba(176,38,255,.12);border:1px solid rgba(176,38,255,.45)}
 </style>
 </head>
 <body>
@@ -402,16 +405,16 @@ body{background:radial-gradient(120% 45% at 50% -8%,#2A0A4A 0%,rgba(42,10,74,0) 
 <div class="page" id="page-confirm">
   <div class="cf-wrap">
     <div class="cf-ico">🛸</div>
-    <h1 class="cf-title">Commande envoyée</h1>
+    <h1 class="cf-title">Commande enregistrée</h1>
     <p class="cf-text" id="cf-text"></p>
+    <a class="cf-btn cf-send" id="cf-tg" href="#">📲 Envoyer ma commande sur Telegram</a>
     <div class="cf-card">
       <div class="cf-row"><span>Référence</span><b id="cf-ref"></b></div>
       <div class="cf-row"><span>Mode</span><b id="cf-mode"></b></div>
       <div class="cf-items" id="cf-items"></div>
       <div class="cf-row cf-total"><span>Total</span><b id="cf-total"></b></div>
     </div>
-    <button type="button" class="cf-btn" id="cf-back">Retour au catalogue</button>
-    <a class="cf-link" id="cf-tg" href="#" target="_blank" rel="noopener">Écrire au vendeur sur Telegram</a>
+    <button type="button" class="cf-ghost" id="cf-back">Retour au catalogue</button>
   </div>
 </div>
 
@@ -730,14 +733,20 @@ document.getElementById("btn-send").addEventListener("click",async function(){
     } else showToast("Commande non envoyée. Vérifie ta connexion et réessaie.");
     btn.disabled=false; btn.innerHTML=label; return;
   }
-  try{ fetch("/api/notify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:ref}),keepalive:true}).catch(function(){}); }catch(e){}
-  var msg="Commande "+ref+"\n"+items.map(function(i){return "- "+i.name+" "+i.weight+" x"+i.qty;}).join("\n")+"\nTotal : "+sub+" €";
-  document.getElementById("cf-text").textContent="On te contacte sur Telegram ("+pseudo+") pour confirmer "+(selectedDelivery==="livraison"?"le créneau de livraison.":"le lieu et l'heure du meet-up.");
+  var L=["🧾 Nouvelle commande "+ref,"Client : "+pseudo,"Tél : "+phone,""];
+  if(selectedDelivery==="livraison") L.push("🚚 Livraison","Adresse : "+addr); else L.push("🤝 Meet-up");
+  L.push("","Produits :");
+  items.forEach(function(i){ L.push("- "+i.name+" · "+i.weight+" ×"+i.qty+" = "+fmtEur(i.price*i.qty)); });
+  L.push("","💰 Total : "+fmtEur(sub));
+  if(notes) L.push("📝 Notes : "+notes);
+  var msg=L.join("\n");
+  var seller="@"+CONTACT_URL.replace(/\/+$/,"").split("/").pop();
+  document.getElementById("cf-text").innerHTML="<b>Dernière étape :</b> appuie sur le bouton ci-dessous pour envoyer ta commande à "+esc(seller)+". Le message est déjà rédigé, il te suffit d'appuyer sur Envoyer dans Telegram. On te confirme ensuite "+(selectedDelivery==="livraison"?"le créneau de livraison.":"le lieu et l'heure du meet-up.");
   document.getElementById("cf-ref").textContent=ref;
   document.getElementById("cf-mode").textContent=selectedDelivery==="livraison"?"Livraison":"Meet-up";
   document.getElementById("cf-items").innerHTML=items.map(function(i){return "<div class='cf-item'><span>"+esc(i.name)+" · "+esc(i.weight)+" ×"+esc(i.qty)+"</span><span>"+esc(i.price*i.qty)+" €</span></div>";}).join("");
   document.getElementById("cf-total").textContent=sub+" €";
-  document.getElementById("cf-tg").href="https://t.me/laligue51_com?text="+encodeURIComponent(msg);
+  document.getElementById("cf-tg").href=CONTACT_URL+"?text="+encodeURIComponent(msg);
   saveContact();
   cart=[];updateCartBadge();
   btn.disabled=false; btn.innerHTML=label;
@@ -832,7 +841,11 @@ function openTg(url){
   if(CHANNEL_URL){ ch.hidden=false; sp.hidden=false; }
   ch.addEventListener("click",function(){ openTg(CHANNEL_URL); });
   sp.addEventListener("click",function(e){ e.preventDefault(); openTg(CHANNEL_URL); });
-  document.getElementById("cf-tg").addEventListener("click",function(e){ e.preventDefault(); openTg(this.href); });
+  document.getElementById("cf-tg").addEventListener("click",function(e){
+    e.preventDefault(); var u=this.href;
+    try{ if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData&&Telegram.WebApp.openTelegramLink){ Telegram.WebApp.openTelegramLink(u); return; } }catch(err){}
+    window.location.href=u;
+  });
 })();
 </script>
 </body>
