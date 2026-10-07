@@ -1,15 +1,15 @@
 // Vercel : webhook du bot Telegram. Répond à /start avec la carte de bienvenue.
 // Variables Vercel : TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET
 const SHOP_URL = "https://starfarms-51.vercel.app/";
-const IMAGE_URL = "https://starfarms-51.vercel.app/bienvenue2.jpg";
+const IMAGE_URL = "https://starfarms-51.vercel.app/gelato.png";
 const CHANNEL_URL = "https://t.me/+uYWHra2ouU0zNmY0";
 const CONTACT_URL = "https://t.me/laligue51_com";
 
 const KEYBOARD = {
   inline_keyboard: [
-    [{ text: "🛸 STAR'FARMS MENU", web_app: { url: SHOP_URL } }],
-    [{ text: "🌌 CANAL TELEGRAM", url: CHANNEL_URL }],
-    [{ text: "🛰️ CONTACT", url: CONTACT_URL }]
+    [{ text: "🍦 GELATO MENU", web_app: { url: SHOP_URL } }],
+    [{ text: "📢 CANAL TELEGRAM", url: CHANNEL_URL }],
+    [{ text: "📩 CONTACT", url: CONTACT_URL }]
   ]
 };
 
@@ -51,14 +51,14 @@ module.exports = async (req, res) => {
           photo: IMAGE_URL,
           parse_mode: "HTML",
           caption:
-            `🛸 Bienvenue chez <b>Star'Farms V2</b>${name ? "," + name : ""} 🌌\n\n` +
-            `🛰️ Appuie sur <b>STAR'FARMS MENU</b> pour ouvrir le shop 👇`,
+            `🍦 Bienvenue chez <b>Gelato Express</b>${name ? "," + name : ""} 🍧\n\n` +
+            `🛵 Appuie sur <b>GELATO MENU</b> pour ouvrir le shop 👇`,
           reply_markup: KEYBOARD
         });
       } else {
         await tg("sendMessage", {
           chat_id: chatId,
-          text: "🛸 Pour commander, ouvre la boutique avec le bouton ci-dessous.\n🛰️ Pour une question, passe par Contact.",
+          text: "🍦 Pour commander, ouvre la boutique avec le bouton ci-dessous.\n📩 Pour une question, passe par Contact.",
           reply_markup: KEYBOARD
         });
       }
